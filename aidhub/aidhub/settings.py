@@ -56,17 +56,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'aidhub.wsgi.application'
 
-# Database configuration
+# Database configuration - Remove SSL requirement for SQLite
 DATABASES = {
-    'default': dj_database_url.parse(
-        os.getenv(
-            'DATABASE_URL',
-            'sqlite:///' + str(BASE_DIR / 'db.sqlite3')
-        ),
+    'default': dj_database_url.config(
+        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
         conn_max_age=600,
         conn_health_checks=True,
     )
 }
+
+# Only add SSL options for PostgreSQL
+if 'postgres' in DATABASES['default'].get('ENGINE', ''):
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require'
+    }
+
+# Additional Railway-specific database settings
+if 'RAILWAY_ENVIRONMENT' in os.environ:
+    DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require'
+    }
 
 # Ensure SSL is used in production
 if not DEBUG and DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
@@ -97,9 +107,10 @@ USE_TZ = True
 # Static files settings
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Changed from parent dir to project dir
-]
+STATICFILES_DIRS = []  # Remove the non-existent directory
+
+if os.path.exists(os.path.join(BASE_DIR, 'static')):
+    STATICFILES_DIRS.append(os.path.join(BASE_DIR, 'static'))
 
 # Add whitenoise settings
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -167,7 +178,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = 'AidHub Team - Hexacoders'
 
 # Media files settings
 MEDIA_URL = '/media/'

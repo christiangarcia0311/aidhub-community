@@ -10,6 +10,10 @@ from geopy.distance import geodesic
 import json
 import logging
 from .ml.image_classifier import classifier  # Add this import
+from django.views.decorators.csrf import csrf_exempt  # Add this import
+from django.core.mail import send_mail
+from django.conf import settings
+from django.template.loader import render_to_string
 
 logger = logging.getLogger('aidhub')
 
@@ -177,6 +181,17 @@ class DonationView(View):
                     recipient.delete()
                     logger.info(f"Donation successful: {donation.id}")
 
+                    # Send emails after successful donation
+                    self.send_donation_emails(
+                        donor_name=data['donor_name'],
+                        donor_email=data['donor_contact'],
+                        recipient_name=recipient.name,
+                        recipient_email=recipient.contact,
+                        donation_type=data['donation_type'],
+                        pickup_location=data['pickup_location'],
+                        delivery_location=recipient.location
+                    )
+
                     return JsonResponse({
                         "success": True,
                         "message": "Donation successful",
@@ -200,6 +215,69 @@ class DonationView(View):
                 "success": False,
                 "error": "An unexpected error occurred while processing your donation"
             }, status=500)
+
+    def send_donation_emails(self, donor_name, donor_email, recipient_name, 
+                           recipient_email, donation_type, pickup_location, 
+                           delivery_location):
+        try:
+            # Send email to donor
+            donor_subject = 'Thank you for your donation!'
+            donor_message = f"""
+            Dear {donor_name},
+
+            Thank you for your generous donation of {donation_type}. 
+            Your donation will be picked up from: {pickup_location}
+
+            Recipient Details:
+            Name: {recipient_name}
+            Contact: {recipient_email}
+            Delivery Location: {delivery_location}
+
+            Thank you for making a difference in your community!
+
+            Best regards,
+            AidHub Team
+            """
+            
+            send_mail(
+                subject=donor_subject,
+                message=donor_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[donor_email],
+                fail_silently=False,
+            )
+
+            # Send email to recipient
+            recipient_subject = 'Good news! Your donation request has been matched'
+            recipient_message = f"""
+            Dear {recipient_name},
+
+            Good news! Your request for {donation_type} has been matched with a donor.
+
+            Donor Details:
+            Name: {donor_name}
+            Contact: {donor_email}
+            Pickup Location: {pickup_location}
+
+            Please coordinate with the donor to arrange the pickup/delivery.
+
+            Best regards,
+            AidHub Team
+            """
+
+            send_mail(
+                subject=recipient_subject,
+                message=recipient_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[recipient_email],
+                fail_silently=False,
+            )
+
+        except Exception as e:
+            logger.error(f"Error sending donation emails: {str(e)}")
+            # Don't raise the exception - we don't want to roll back the donation
+            # if email sending fails
+            pass
 
 class AddRecipientView(View):
     def post(self, request):
@@ -344,3 +422,28 @@ class ClassifyImageView(View):  # Add this new view class
                 'success': False,
                 'message': str(e)
             }, status=500)
+
+@csrf_exempt
+def current_needs(request):
+    try:
+        # Get all active recipient requests
+        recipients = Recipient.objects.all()
+        needs = [
+            {
+                'donation_type': r.donation_type,
+                'urgency': r.urgency,
+                'location': r.location
+            } 
+            for r in recipients
+        ]
+        
+        return JsonResponse({
+            'success': True,
+            'needs': needs
+        })
+    except Exception as e:
+        logger.error(f"Error fetching current needs: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'error': 'Error fetching current needs'
+        }, status=500)

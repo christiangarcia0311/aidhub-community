@@ -152,6 +152,30 @@
             margin-right: 0.5rem;
             vertical-align: middle;
         }
+
+        .donation-method-tab {
+            transition: all 0.3s;
+        }
+        .donation-method-tab.active {
+            border-bottom-color: #2563eb;
+            color: #2563eb;
+        }
+
+        .modal-content.wide-content {
+            max-width: 1000px;  /* Increase from 600px to 1000px */
+            width: 95%;
+        }
+        
+        .modal-content.wide-content #map-container {
+            height: 400px;
+            width: 100%;
+            margin-bottom: 0;
+        }
+        
+        .modal-content.wide-content #recipients-list {
+            max-height: 400px; /* Match map height */
+            padding-right: 10px;
+        }
     </style>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
@@ -297,21 +321,53 @@
                 <div id="donate-step-1" class="modal-step">
                     <form id="find-form" class="grid grid-cols-1 gap-4">
                         <input type="hidden" id="donation-type" value="">
-                        <div>
-                            <label class="block text-gray-700 mb-1">Upload Donation Image</label>
-                            <div class="flex items-center space-x-2">
-                                <input type="file" id="donation-image" accept="image/*" class="hidden" onchange="previewImage(event)">
-                                <button type="button" onclick="document.getElementById('donation-image').click()" 
-                                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                    Choose Image
+                        <!-- Add selection method tabs -->
+                        <div class="border-b border-gray-200 mb-4">
+                            <div class="flex">
+                                <button type="button" onclick="toggleDonationMethod('image')" 
+                                        class="px-4 py-2 border-b-2 border-transparent donation-method-tab active"
+                                        data-method="image">
+                                    Upload Image
                                 </button>
-                                <span id="selected-file" class="text-sm text-gray-600"></span>
-                            </div>
-                            <div id="image-preview" class="mt-2 hidden">
-                                <img id="preview-img" class="max-w-full h-48 object-contain rounded border">
-                                <p id="classification-result" class="mt-2 text-sm font-medium"></p>
+                                <button type="button" onclick="toggleDonationMethod('select')"
+                                        class="px-4 py-2 border-b-2 border-transparent donation-method-tab"
+                                        data-method="select">
+                                    Select from List
+                                </button>
                             </div>
                         </div>
+
+                        <!-- Image upload section -->
+                        <div id="image-upload-section">
+                            <div>
+                                <label class="block text-gray-700 mb-1">Upload Donation Image</label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="file" id="donation-image" accept="image/*" class="hidden" onchange="previewImage(event)">
+                                    <button type="button" onclick="document.getElementById('donation-image').click()" 
+                                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                        Choose Image
+                                    </button>
+                                    <span id="selected-file" class="text-sm text-gray-600"></span>
+                                </div>
+                                <div id="image-preview" class="mt-2 hidden">
+                                    <img id="preview-img" class="max-w-full h-48 object-contain rounded border">
+                                    <p id="classification-result" class="mt-2 text-sm font-medium"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown selection section -->
+                        <div id="select-type-section" class="hidden">
+                            <div>
+                                <label class="block text-gray-700 mb-1">Select from Current Needs</label>
+                                <select id="donation-type-select" class="w-full px-3 py-2 border rounded" 
+                                        onchange="document.getElementById('donation-type').value = this.value">
+                                    <option value="">Choose what you want to donate</option>
+                                </select>
+                                <p class="text-sm text-gray-500 mt-1">These are items currently needed by recipients</p>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-gray-700 mb-1">Your Location</label>
                             <input type="text" id="donor-location" class="w-full px-3 py-2 border rounded" placeholder="City, State or Address" required>
@@ -323,10 +379,15 @@
                 </div>
                 
                 <div id="donate-step-2" class="modal-step hidden">
-                    <h3 class="text-lg font-medium mb-3">Matching Recipients</h3>
-                    <!-- Add map container -->
-                    <div id="map-container"></div>
-                    <div id="recipients-list" class="space-y-4 max-h-60 overflow-y-auto"></div>
+                    <h3 class="text-lg font-medium mb-4">Matching Recipients</h3>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="md:w-1/2">
+                            <div id="map-container" class="rounded-lg border"></div>
+                        </div>
+                        <div class="md:w-1/2">
+                            <div id="recipients-list" class="space-y-4 overflow-y-auto"></div>
+                        </div>
+                    </div>
                     <button onclick="showDonateStep(1)" class="mt-4 text-blue-600 hover:text-blue-800">← Back to search</button>
                 </div>
                 
@@ -526,6 +587,14 @@
             
             // Show requested step
             document.getElementById(`donate-step-${step}`).classList.remove('hidden');
+            
+            // Toggle wide content class
+            const modalContent = document.querySelector('#modal-donate .modal-content');
+            if (step === 2) {
+                modalContent.classList.add('wide-content');
+            } else {
+                modalContent.classList.remove('wide-content');
+            }
         }
 
         // Initialize the map
@@ -1127,6 +1196,84 @@
                 showNotification('Error classifying image', 'error');
             });
         }
+
+        function toggleDonationMethod(method) {
+            // Update tab styles
+            document.querySelectorAll('.donation-method-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.method === method) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Show/hide sections
+            const imageSection = document.getElementById('image-upload-section');
+            const selectSection = document.getElementById('select-type-section');
+            
+            if (method === 'image') {
+                imageSection.classList.remove('hidden');
+                selectSection.classList.add('hidden');
+                // Reset select value
+                document.getElementById('donation-type-select').value = '';
+            } else {
+                imageSection.classList.add('hidden');
+                selectSection.classList.remove('hidden');
+                // Load current needs into select
+                fetchCurrentNeeds();
+                // Reset image preview
+                document.getElementById('image-preview').classList.add('hidden');
+                document.getElementById('donation-image').value = '';
+                document.getElementById('selected-file').textContent = '';
+            }
+
+            // Reset hidden input
+            document.getElementById('donation-type').value = '';
+        }
+
+        // Add this new function to fetch current needs
+        function fetchCurrentNeeds() {
+            const select = document.getElementById('donation-type-select');
+            select.innerHTML = '<option value="">Loading current needs...</option>';
+            
+            fetch('/api/current_needs/')
+                .then(response => response.json())
+                .then(data => {
+                    select.innerHTML = '<option value="">Choose what you want to donate</option>';
+                    if (data.needs && data.needs.length > 0) {
+                        // Group needs by type and count
+                        const needCounts = data.needs.reduce((acc, need) => {
+                            acc[need.donation_type] = (acc[need.donation_type] || 0) + 1;
+                            return acc;
+                        }, {});
+                        
+                        // Create options for each need type
+                        Object.entries(needCounts)
+                            .sort((a, b) => b[1] - a[1]) // Sort by count descending
+                            .forEach(([type, count]) => {
+                                const option = document.createElement('option');
+                                option.value = type;
+                                option.textContent = `${type} (${count} requests)`;
+                                select.appendChild(option);
+                            });
+                    } else {
+                        select.innerHTML = '<option value="">No current needs found</option>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching needs:', error);
+                    select.innerHTML = '<option value="">Error loading needs</option>';
+                });
+        }
+
+        // Add validation to form submission
+        document.getElementById('find-form').addEventListener('submit', function(e) {
+            const donationType = document.getElementById('donation-type').value;
+            if (!donationType) {
+                e.preventDefault();
+                showNotification('Please select a donation type or upload an image', 'error');
+                return false;
+            }
+        });
     </script>
 </body>
 </html>

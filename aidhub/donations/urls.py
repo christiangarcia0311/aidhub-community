@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     IndexView, TrendingView, RecipientListView,
     DonationView, AddRecipientView, HistoryView, SummaryStatsView,
-    ClassifyImageView
+    ClassifyImageView, current_needs
 )
 
 urlpatterns = [
@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/summary_stats/', SummaryStatsView.as_view(), name='summary_stats-slash'),
     path('api/classify_image', ClassifyImageView.as_view(), name='classify_image'),
     path('api/classify_image/', ClassifyImageView.as_view(), name='classify_image-slash'),
+    path('api/current_needs/', current_needs, name='current_needs'),
 ]
