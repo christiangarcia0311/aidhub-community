@@ -56,7 +56,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'aidhub.wsgi.application'
 
-# Database configuration - Remove SSL requirement for SQLite
+# Database Configuration
 DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
@@ -65,24 +65,9 @@ DATABASES = {
     )
 }
 
-# Only add SSL options for PostgreSQL
+# Ensure SSL for PostgreSQL
 if 'postgres' in DATABASES['default'].get('ENGINE', ''):
-    DATABASES['default']['OPTIONS'] = {
-        'sslmode': 'require'
-    }
-
-# Additional Railway-specific database settings
-if 'RAILWAY_ENVIRONMENT' in os.environ:
-    DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
-    DATABASES['default']['OPTIONS'] = {
-        'sslmode': 'require'
-    }
-
-# Ensure SSL is used in production
-if not DEBUG and DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
-    DATABASES['default']['OPTIONS'] = {
-        'sslmode': 'require'
-    }
+    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
 AUTH_PASSWORD_VALIDATORS = [
     {

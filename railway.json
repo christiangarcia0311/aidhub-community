@@ -17,11 +17,7 @@
     },
     "plugins": [
         {
-            "name": "PostgreSQL",
-            "envs": {
-                "DATABASE_URL": "{{plugins.postgresql.DATA_URL}}",
-                "POSTGRES_SSL_MODE": "require"
-            }
+            "name": "PostgreSQL"
         }
     ]
 }
