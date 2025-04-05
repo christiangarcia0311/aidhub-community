@@ -61,13 +61,14 @@ DATABASES = {
     'default': dj_database_url.config(
         default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
         conn_max_age=600,
+        ssl_require=True,  # Add this for Railway PostgreSQL
         conn_health_checks=True,
     )
 }
 
-# Ensure SSL for PostgreSQL
-if 'postgres' in DATABASES['default'].get('ENGINE', ''):
-    DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
+# Remove the existing SSL check since we're enforcing it above
+# if 'postgres' in DATABASES['default'].get('ENGINE', ''):
+#     DATABASES['default']['OPTIONS'] = {'sslmode': 'require'}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
