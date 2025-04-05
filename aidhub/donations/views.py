@@ -83,7 +83,8 @@ class RecipientListView(View):
                     'urgency': recipient.urgency,
                     'contact': recipient.contact,
                     'confidence': confidence,
-                    'distance': distance  # Add distance to response
+                    'distance': distance,  # Add distance to response
+                    'message': recipient.message  # Include message in response
                 })
             
             # Sort by distance and urgency
@@ -119,7 +120,7 @@ class DonationView(View):
                 }, status=400)
 
             # Validate required fields - remove donor_name from required fields
-            required = ['donor_contact', 'donation_type', 
+            required = ['donor_contact', 'donor_phone', 'donation_type', 
                        'donor_location', 'pickup_location', 'recipient_id']
             
             missing_fields = [field for field in required if not data.get(field)]
@@ -166,12 +167,15 @@ class DonationView(View):
                         donor_name=data.get('donor_name', ''),  # Use get() with empty default
                         recipient_contact=recipient.contact,
                         donor_contact=data['donor_contact'],
+                        donor_phone=data['donor_phone'],
+                        recipient_phone=recipient.phone,
                         pickup_location=data['pickup_location']
                     )
                     
                     donation = Donation.objects.create(
                         donor_name=data.get('donor_name', ''),  # Use get() with empty default
                         donor_contact=data['donor_contact'],
+                        donor_phone=data['donor_phone'],
                         donation_type=data['donation_type'].lower(),
                         pickup_location=data['pickup_location'],
                         recipient=recipient
@@ -183,20 +187,23 @@ class DonationView(View):
 
                     # Send emails after successful donation
                     self.send_donation_emails(
-                        donor_name=data['donor_name'],
+                        donor_name=data.get('donor_name', 'Anonymous Donor'),
                         donor_email=data['donor_contact'],
+                        donor_phone=data['donor_phone'],  # Add donor_phone
                         recipient_name=recipient.name,
                         recipient_email=recipient.contact,
+                        recipient_phone=recipient.phone,  # Add recipient phone
                         donation_type=data['donation_type'],
                         pickup_location=data['pickup_location'],
-                        delivery_location=recipient.location
+                        delivery_location=recipient.location,
+                        message=data.get('message', '')
                     )
 
                     return JsonResponse({
                         "success": True,
                         "message": "Donation successful",
                         "details": {
-                            "donor": data['donor_name'],
+                            "donor": data.get('donor_name', 'Anonymous Donor'),
                             "recipient": recipient.name,
                             "type": data['donation_type']
                         }
@@ -216,9 +223,9 @@ class DonationView(View):
                 "error": "An unexpected error occurred while processing your donation"
             }, status=500)
 
-    def send_donation_emails(self, donor_name, donor_email, recipient_name, 
-                           recipient_email, donation_type, pickup_location, 
-                           delivery_location):
+    def send_donation_emails(self, donor_name, donor_email, donor_phone, recipient_name, 
+                           recipient_email, recipient_phone, donation_type, pickup_location, 
+                           delivery_location, message):
         try:
             # Send email to donor
             donor_subject = 'Thank you for your donation!'
@@ -230,18 +237,19 @@ Dear {donor_name},
 Thank you for your generous donation of {donation_type}. 
 Your contribution will make a real difference in someone's life.
 
-Pickup Details
+Your Message:
+{message or "No message provided"}
 
+Pickup Details
 - Location: {pickup_location}
 
 Recipient Information  
-
 - Name: {recipient_name}
-- Contact: {recipient_email}
+- Email: {recipient_email}
+- Phone: {recipient_phone or 'Not provided'}
 - Delivery Location: {delivery_location}
 
 Please coordinate with the recipient to arrange the transfer of your donation.
-
 
 Thank you for making a difference in your community!
 
@@ -261,21 +269,22 @@ AidHub Team
             recipient_subject = 'Good news! Your donation request has been matched'
             recipient_message = f"""
 Donation Match Notification
-=========================
 
 Dear {recipient_name},
 
 Great news! Your request for {donation_type} has been matched with a donor.
 
 Donor Information
----------------
 - Name: {donor_name}
-- Contact: {donor_email} 
+- Email: {donor_email} 
+- Phone: {donor_phone or 'Not provided'}
 - Pickup Location: {pickup_location}
+
+Donor's Message:
+{message or "No message provided"}
 
 Please coordinate with the donor to arrange the pickup/delivery of your donation.
 
----------------------------
 Best regards,
 AidHub Team
 """
@@ -288,15 +297,19 @@ AidHub Team
                 fail_silently=False,
             )
 
+            logger.info(f"Donation emails sent successfully to {donor_email} and {recipient_email}")
+
         except Exception as e:
             logger.error(f"Error sending donation emails: {str(e)}")
+            # Don't raise the exception to prevent transaction rollback
+            # But log it for debugging
             pass
 
 class AddRecipientView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
-            required = ['name', 'location', 'donation_type', 'contact']
+            required = ['name', 'location', 'donation_type', 'contact', 'phone']  # Add phone requirement
             
             if not all(field in data for field in required):
                 return JsonResponse({"error": "Missing required fields"}, status=400)
@@ -314,7 +327,9 @@ class AddRecipientView(View):
                 longitude=longitude,
                 donation_type=data['donation_type'].lower(),
                 urgency=urgency,
-                contact=data['contact']
+                contact=data['contact'],
+                phone=data.get('phone', ''),  # Add phone number
+                message=data.get('message', '')  # Changed from request_message to message
             )
             
             # Retrain models

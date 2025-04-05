@@ -358,11 +358,15 @@
         
         <!-- Content with enhanced text shadows -->
         <div class="container mx-auto px-4 text-center relative z-10">
-            <h1 class="text-4xl md:text-5xl font-bold mb-6" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Connect Donations Directly with Those in Need</h1>
-            <p class="text-xl mb-8 max-w-2xl mx-auto" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">AidHub brings donors and recipients together without middlemen, making charitable giving more efficient and personal.</p>
+            <h1 class="text-4xl md:text-5xl font-bold mb-6" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Connect with AidHub Community</h1>
+            <p class="text-xl mb-8 max-w-2xl mx-auto" style="text-shadow: 1px 1px 3px rgba(0,0,0,0.5);">
+                A community-driven platform dedicated to providing support where 
+                it matters. Through transparency and direct assistance, you can create 
+                real change right now.
+            </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <button onclick="showModal('modal-donate')" class="px-8 py-3 rounded-full bg-white text-blue-600 hover:bg-blue-50 font-medium text-lg shadow-lg hover:shadow-xl transition-shadow">Donate Now</button>
-                <button onclick="showModal('modal-request')" class="px-8 py-3 rounded-full bg-transparent hover:bg-blue-500 border-2 border-white font-medium text-lg shadow-lg hover:shadow-xl transition-shadow">Request Aid</button>
+                <button onclick="showModal('modal-donate')" class="px-8 py-3 rounded-full bg-white text-blue-600 hover:bg-blue-50 font-medium text-lg shadow-lg hover:shadow-xl transition-shadow">Give Support</button>
+                <button onclick="showModal('modal-request')" class="px-8 py-3 rounded-full bg-transparent hover:bg-blue-500 border-2 border-white font-medium text-lg shadow-lg hover:shadow-xl transition-shadow">Ask for Support</button>
             </div>
         </div>
     </header>
@@ -372,7 +376,7 @@
         <div class="container mx-auto px-4">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold mb-3">Trending Donation Needs</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">Real-time updates of the most requested donations in your community</p>
+                <p class="text-gray-600 max-w-2xl mx-auto">Real-time updates of the most requested donations</p>
             </div>
             <div id="trending-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="loader"></div> Loading trending needs...
@@ -394,7 +398,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold mb-3">1. Submit Details</h3>
-                    <p class="text-gray-600">Share what you'd like to donate or what you need. Our AI system analyzes requests to prioritize urgent needs and find the best matches.</p>
+                    <p class="text-gray-600">Share what you'd like to give or what you need. Our AI system analyzes requests to prioritize urgent needs and find the best matches.</p>
                 </div>
                 <div class="bg-white p-8 rounded-lg shadow-lg text-center transform transition-transform hover:scale-105">
                     <div class="text-blue-600 text-5xl mb-4">
@@ -404,7 +408,7 @@
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold mb-3">2. Get Matched</h3>
-                    <p class="text-gray-600">Our smart matching system connects donors with recipients based on location, urgency, and specific needs, ensuring efficient distribution.</p>
+                    <p class="text-gray-600">Our smart matching system connects givers and to those who are in need based on location, urgency and specific needs, ensuring efficient distribution.</p>
                 </div>
                 <div class="bg-white p-8 rounded-lg shadow-lg text-center transform transition-transform hover:scale-105">
                     <div class="text-blue-600 text-5xl mb-4">
@@ -449,7 +453,7 @@
         <div class="container mx-auto px-4 text-center">
             <p>© 2025 AidHub - Connecting donors and recipients directly.</p>
             <div class="mt-4">
-                <a href="#" class="mx-2 hover:text-blue-300">About</a>
+                <a href="#" onclick="showModal('modal-about'); return false;" class="mx-2 hover:text-blue-300">About</a>
                 <a href="#" class="mx-2 hover:text-blue-300">Contact</a>
                 <a href="#" class="mx-2 hover:text-blue-300">Privacy Policy</a>
                 <a href="#" class="mx-2 hover:text-blue-300">Terms of Service</a>
@@ -462,7 +466,7 @@
         <div class="modal-content">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold">Make a Donation</h2>
+                    <h2 class="text-xl font-semibold">Offer your Support</h2>
                     <button onclick="closeModal('modal-donate')" class="text-gray-500 hover:text-gray-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -492,7 +496,7 @@
                         <!-- Image upload section -->
                         <div id="image-upload-section">
                             <div>
-                                <label class="block text-gray-700 mb-1">Upload Donation Image</label>
+                                <label class="block text-gray-700 mb-1">Upload item image you can offer</label>
                                 <div class="flex items-center space-x-2">
                                     <input type="file" id="donation-image" accept="image/*" class="hidden" onchange="previewImage(event)">
                                     <button type="button" onclick="document.getElementById('donation-image').click()" 
@@ -514,9 +518,9 @@
                                 <label class="block text-gray-700 mb-1"></label>
                                 <select id="donation-type-select" class="w-full px-3 py-2 border rounded" 
                                         onchange="document.getElementById('donation-type').value = this.value">
-                                    <option value="">Choose what you want to donate</option>
+                                    <option value="">Choose what you want to give</option>
                                 </select>
-                                <p class="text-sm text-gray-500 mt-1">These are items currently needed by recipients</p>
+                                <p class="text-sm text-gray-500 mt-1">Currently requested items</p>
                             </div>
                         </div>
 
@@ -552,7 +556,7 @@
                 </div>
                 
                 <div id="donate-step-2" class="modal-step hidden">
-                    <h3 class="text-lg font-medium mb-4">Matching Recipients</h3>
+                    <h3 class="text-lg font-medium mb-4">Aid Match Results</h3>
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="md:w-1/2">
                             <div id="map-container" class="rounded-lg border"></div>
@@ -565,7 +569,7 @@
                 </div>
                 
                 <div id="donate-step-3" class="modal-step hidden">
-                    <h3 class="text-lg font-medium mb-3">Complete Donation</h3>
+                    <h3 class="text-lg font-medium mb-3">Send Support</h3>
                     <form id="donation-form" class="grid grid-cols-1 gap-4">
                         <input type="hidden" id="recipient-id">
                         <div>
@@ -574,17 +578,26 @@
                         </div>
                         <div>
                             <label class="block text-gray-700 mb-1">Email</label>
-                            <input type="text" id="donor-contact" class="w-full px-3 py-2 border rounded" placeholder="Enter Email" required>
+                            <input type="email" id="donor-contact" class="w-full px-3 py-2 border rounded" placeholder="Enter Email" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-1">Phone Number</label>
+                            <input type="tel" id="donor-phone" class="w-full px-3 py-2 border rounded" placeholder="Enter Phone Number" required>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-1">Message</label>
+                            <textarea id="donation-message" rows="3" class="w-full px-3 py-2 border rounded" 
+                                    placeholder="Describe what you're donating and any special instructions..." required></textarea>
                         </div>
                         <div>
                             <label class="block text-gray-700 mb-1">Pickup Location</label>
                             <input type="text" id="pickup-location" class="w-full px-3 py-2 border rounded" placeholder="Where can the donation be picked up?" required>
                         </div>
                         <div>
-                            <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Confirm Donation</button>
+                            <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Send Support</button>
                         </div>
                     </form>
-                    <button onclick="showDonateStep(2)" class="mt-4 text-blue-600 hover:text-blue-800">← Back to recipients</button>
+                    <button onclick="showDonateStep(2)" class="mt-4 text-blue-600 hover:text-blue-800">← Back to match results</button>
                 </div>
             </div>
         </div>
@@ -636,9 +649,19 @@
                         <label class="block text-gray-700 mb-1">Need Type</label>
                         <input type="text" id="need-type" class="w-full px-3 py-2 border rounded" placeholder="e.g., food, clothes, medicine, supplies" required>
                     </div>
+                    <!-- Add message field for request -->
+                    <div>
+                        <label class="block text-gray-700 mb-1">Why do you need this support?</label>
+                        <textarea id="request-message" rows="3" class="w-full px-3 py-2 border rounded" 
+                                placeholder="Please explain your situation and why you need this support..." required></textarea>
+                    </div>
                     <div>
                         <label class="block text-gray-700 mb-1">Email</label>
-                        <input type="text" id="recipient-contact" class="w-full px-3 py-2 border rounded" placeholder="Enter Email" required>
+                        <input type="email" id="recipient-contact" class="w-full px-3 py-2 border rounded" placeholder="Enter Email" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-1">Phone Number</label>
+                        <input type="tel" id="recipient-phone" class="w-full px-3 py-2 border rounded" placeholder="Enter Phone Number" required>
                     </div>
                     <div>
                         <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Request</button>
@@ -693,6 +716,83 @@
         </div>
     </div>
 
+    <!-- About Modal -->
+    <div id="modal-about" class="modal">
+        <div class="modal-content max-w-4xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">About AidHub</h2>
+                    <button onclick="closeModal('modal-about')" class="text-gray-500 hover:text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-lg font-medium text-blue-600 mb-4">Our Mission</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        AidHub is a community-driven platform that connects donors directly with those in need. 
+                        Our mission is to streamline the donation process by eliminating intermediaries and using 
+                        advanced AI technology to ensure donations reach those who need them most effectively.
+                    </p>
+                </div>
+
+                <div class="mb-8">
+                    <h3 class="text-lg font-medium text-blue-600 mb-4">Meet Our Team</h3>
+                    
+                    <h4 class="text-md font-medium text-gray-700 mb-3">Backend Developers</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                        <div class="text-center">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=christian" alt="Backend Dev 1" class="w-32 h-32 rounded-full mx-auto mb-2 object-cover bg-gray-100">
+                            <h5 class="font-medium">Christian G. Garcia</h5>
+                            <p class="text-sm text-gray-500">Lead Backend Developer</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=renier" alt="Backend Dev 2" class="w-32 h-32 rounded-full mx-auto mb-2 object-cover bg-gray-100">
+                            <h5 class="font-medium">Mark Renier B. Fostanes</h5>
+                            <p class="text-sm text-gray-500">Backend | ML Developer</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=prince" alt="Backend Dev 3" class="w-32 h-32 rounded-full mx-auto mb-2 object-cover bg-gray-100">
+                            <h5 class="font-medium">Prince Carl S. Ajoc</h5>
+                            <p class="text-sm text-gray-500">Backend | ML Developer</p>
+                        </div>
+                    </div>
+
+                    <h4 class="text-md font-medium text-gray-700 mb-3">Frontend Developers</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="text-center">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=nilo" alt="Frontend Dev 1" class="w-32 h-32 rounded-full mx-auto mb-2 object-cover bg-gray-100">
+                            <h5 class="font-medium">Nilo Jr. L. Olang</h5>
+                            <p class="text-sm text-gray-500">Frontend Lead Developer</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=nathaniel" alt="Frontend Dev 2" class="w-32 h-32 rounded-full mx-auto mb-2 object-cover bg-gray-100">
+                            <h5 class="font-medium">Nathaniel Paul C. Creencia</h5>
+                            <p class="text-sm text-gray-500">UI/UX Designer</p>
+                        </div>
+                    </div>
+
+                    <h4 class="text-md font-medium text-gray-700 mb-3">Documentation</h4>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="text-center">
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=andrei" alt="UI Designer" class="w-32 h-32 rounded-full mx-auto mb-2 object-cover bg-gray-100">
+                            <h5 class="font-medium">John Andrei S. Julve</h5>
+                            <p class="text-sm text-gray-500">Documentary</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t pt-6 text-center">
+                    <p class="text-gray-600">
+                        Want to join our team? <a href="#" class="text-blue-600 hover:text-blue-800">Contact us</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Notifications -->
     <div id="notification" class="fixed top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow-lg transform transition-transform translate-x-full z-50"></div>
 
@@ -726,11 +826,12 @@
                 const recipientId = document.getElementById('recipient-id').value;
                 const donorName = document.getElementById('donor-name').value;
                 const donorContact = document.getElementById('donor-contact').value;
+                const donorPhone = document.getElementById('donor-phone').value;
                 const donorLocation = document.getElementById('donor-location').value;
                 const donationType = document.getElementById('donation-type').value;
                 const pickupLocation = document.getElementById('pickup-location').value;
                 
-                submitDonation(donorName, donorContact, donationType, donorLocation, pickupLocation, recipientId);
+                submitDonation(donorName, donorContact, donorPhone, donationType, donorLocation, pickupLocation, recipientId);
             });
 
             // Request Form
@@ -740,8 +841,9 @@
                 const location = document.getElementById('recipient-location').value;
                 const donationType = document.getElementById('need-type').value;
                 const contact = document.getElementById('recipient-contact').value;
+                const phone = document.getElementById('recipient-phone').value;
                 
-                submitRequest(name, location, donationType, contact);
+                submitRequest(name, location, donationType, contact, phone);
             });
         });
 
@@ -861,27 +963,17 @@
                 // Calculate offset for this popup
                 const offset = L.point(overlapping * 20, -overlapping * 20);
                 
-                // Create popup content
+                // Create popup content - simplified version
                 const popupContent = `
                     <div class="marker-popup">
                         <h3>${recipient.name}</h3>
-                        <div>${recipient.donation_type}</div>
-                        <div>${recipient.distance.toFixed(1)} km</div>
-                        <div class="mb-1">
-                            <strong>Contact:</strong> ${recipient.contact}
-                        </div>
-                        <div class="mb-1">
-                            <strong>Location:</strong> ${recipient.location}
-                        </div>
-                        <span class="urgency-badge" style="background-color: ${urgencyColor}">
-                            ${recipient.urgency.toFixed(1)}/5
-                        </span>
-                        <div class="text-xs mt-1">ML Confidence: ${(recipient.confidence * 100).toFixed(0)}%</div>
+                        <div class="mt-1">Needs: ${recipient.donation_type}</div>
+                        <div class="mt-1">Distance: ${recipient.distance.toFixed(1)} km</div>
                         <button 
                             onclick="selectRecipient(${recipient.id})" 
                             class="mt-2 bg-green-600 text-white px-2 py-1 text-xs rounded hover:bg-green-700 w-full"
                         >
-                            Select
+                            Send Support
                         </button>
                     </div>
                 `;
@@ -1018,7 +1110,7 @@
             const icons = {
                 'clothing': '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>',
                 'food': '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18v18H3z M16 8a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>',
-                'medicine': '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                'medicine': '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
                 // Add more icons for other categories
             };
             return icons[type.toLowerCase()] || '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>';
@@ -1085,9 +1177,13 @@
                                                 <span class="text-xs ml-1">(${(recipient.confidence * 100).toFixed(0)}% conf)</span>
                                             </span>
                                         </div>
+                                        <div class="mt-2 text-gray-700">
+                                            <strong>Reason for Request:</strong><br>
+                                            ${recipient.message || "No reason provided"}
+                                        </div>
                                     </div>
                                     <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                                        onclick="event.stopPropagation(); selectRecipient(${recipient.id});">Select</button>
+                                        onclick="event.stopPropagation(); selectRecipient(${recipient.id});">Send Support</button>
                                 </div>
                             `;
                         });
@@ -1128,7 +1224,8 @@
         }
 
         // Submit donation
-        function submitDonation(donorName, donorContact, donationType, donorLocation, pickupLocation, recipientId) {
+        function submitDonation(donorName, donorContact, donorPhone, donationType, donorLocation, pickupLocation, recipientId) {
+            const message = document.getElementById('donation-message').value;
             const submitButton = document.querySelector('#donation-form button[type="submit"]');
             const originalText = submitButton.textContent;
             submitButton.disabled = true;
@@ -1137,10 +1234,12 @@
             const data = {
                 donor_name: donorName || 'Anonymous Donor',  // Empty string if no name provided
                 donor_contact: donorContact,
+                donor_phone: donorPhone,
                 donation_type: donationType,
                 donor_location: donorLocation,
                 pickup_location: pickupLocation,
-                recipient_id: recipientId
+                recipient_id: recipientId,
+                message: message  // Add message to payload
             };
 
             console.log('Submitting donation:', data);
@@ -1183,12 +1282,15 @@
         }
 
         // Submit request
-        function submitRequest(name, location, donationType, contact) {
+        function submitRequest(name, location, donationType, contact, phone) {
+            const message = document.getElementById('request-message').value;
             const payload = {
                 name: name,
                 location: location,
                 donation_type: donationType,
-                contact: contact
+                contact: contact,
+                phone: phone,
+                message: message  // Changed from request_message to message
             };
             
             fetch('/api/add_recipient/', {  // Added trailing slash
@@ -1219,10 +1321,9 @@
         function fetchHistory() {
             const statsContainer = document.getElementById('stats-container');
             const historyContainer = document.getElementById('history-container');
-            
             statsContainer.innerHTML = '<div class="loader"></div> Loading statistics...';
             historyContainer.innerHTML = '<div class="loader"></div> Loading history...';
-            
+
             fetch('/api/history')
                 .then(response => response.json())
                 .then(data => {
@@ -1240,7 +1341,7 @@
                     } else {
                         statsContainer.innerHTML = '<p class="text-center text-gray-500">No statistics available.</p>';
                     }
-                    
+
                     // Render transactions with popup details
                     historyContainer.innerHTML = '';
                     if (data.transactions && data.transactions.length > 0) {
@@ -1269,9 +1370,7 @@
                                                             ${transaction.donation_type}
                                                         </span>
                                                     </div>
-                                                    <div class="text-sm text-gray-500">
-                                                        ${date} ${time}
-                                                    </div>
+                                                    <span class="text-sm text-gray-500">${date} ${time}</span>
                                                 </div>
                                                 <div class="mt-2">
                                                     <div class="font-medium">${transaction.donor_name} → ${transaction.recipient_name}</div>
@@ -1376,10 +1475,10 @@
         function previewImage(event) {
             const file = event.target.files[0];
             if (!file) return;
-        
+            
             // Update selected file name
             document.getElementById('selected-file').textContent = file.name;
-        
+            
             // Show preview
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1392,7 +1491,7 @@
             }
             reader.readAsDataURL(file);
         }
-        
+
         function classifyDonationImage(file) {
             const formData = new FormData();
             formData.append('image', file);
@@ -1429,7 +1528,7 @@
                     tab.classList.add('active');
                 }
             });
-
+            
             // Show/hide sections
             const imageSection = document.getElementById('image-upload-section');
             const selectSection = document.getElementById('select-type-section');
@@ -1439,19 +1538,18 @@
                 selectSection.classList.add('hidden');
                 // Reset select value
                 document.getElementById('donation-type-select').value = '';
+                // Reset image preview
+                document.getElementById('image-preview').classList.add('hidden');
+                document.getElementById('donation-image').value = '';
+                document.getElementById('selected-file').textContent = '';
             } else {
                 imageSection.classList.add('hidden');
                 selectSection.classList.remove('hidden');
                 // Load current needs into select
                 fetchCurrentNeeds();
-                // Reset image preview
-                document.getElementById('image-preview').classList.add('hidden');
-                document.getElementById('donation-image').value = '';
-                document.getElementById('selected-file').textContent = '';
+                // Reset hidden input
+                document.getElementById('donation-type').value = '';
             }
-
-            // Reset hidden input
-            document.getElementById('donation-type').value = '';
         }
 
         // Add this new function to fetch current needs
@@ -1488,16 +1586,6 @@
                     select.innerHTML = '<option value="">Error loading needs</option>';
                 });
         }
-
-        // Add validation to form submission
-        document.getElementById('find-form').addEventListener('submit', function(e) {
-            const donationType = document.getElementById('donation-type').value;
-            if (!donationType) {
-                e.preventDefault();
-                showNotification('Please select a donation type or upload an image', 'error');
-                return false;
-            }
-        });
     </script>
 </body>
 </html>

@@ -8,7 +8,9 @@ class Recipient(models.Model):
     longitude = models.FloatField()
     donation_type = models.CharField(max_length=100)
     urgency = models.FloatField()
-    contact = models.CharField(max_length=200)
+    contact = models.CharField(max_length=200)  # Email
+    phone = models.CharField(max_length=20, blank=True)  # Add phone field
+    message = models.TextField(blank=True, null=True)  # Add message field
     date_added = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -16,7 +18,8 @@ class Recipient(models.Model):
 
 class Donation(models.Model):
     donor_name = models.CharField(max_length=200, blank=True, default='Anonymous Donor')
-    donor_contact = models.CharField(max_length=200)
+    donor_contact = models.CharField(max_length=200)  # Email
+    donor_phone = models.CharField(max_length=20, blank=True)  # Add phone field
     donation_type = models.CharField(max_length=100)
     pickup_location = models.CharField(max_length=200)
     recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE)
@@ -40,8 +43,10 @@ class DonatedRecipient(models.Model):
     donation_type = models.CharField(max_length=100)
     urgency = models.FloatField()
     donor_name = models.CharField(max_length=200, blank=True, default='Anonymous Donor')
-    recipient_contact = models.CharField(max_length=200)
-    donor_contact = models.CharField(max_length=200)
+    recipient_contact = models.CharField(max_length=200)  # Email
+    recipient_phone = models.CharField(max_length=20, blank=True)  # Add phone field
+    donor_contact = models.CharField(max_length=200)  # Email  
+    donor_phone = models.CharField(max_length=20, blank=True)  # Add donor phone
     pickup_location = models.CharField(max_length=200)
     transaction_date = models.DateTimeField(auto_now_add=True)
 
