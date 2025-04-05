@@ -176,6 +176,34 @@
             max-height: 400px; /* Match map height */
             padding-right: 10px;
         }
+
+        .location-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 0.375rem 0.375rem;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .location-suggestion {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+
+        .location-suggestion:hover {
+            background-color: #f3f4f6;
+        }
+
+        .location-input-wrapper {
+            position: relative;
+        }
     </style>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script>
@@ -189,6 +217,119 @@
     (function() {
         emailjs.init(emailjsConfig.publicKey);
     })();
+
+    // Add these functions at the start of the script tag
+    function getFormattedAddress(latitude, longitude) {
+        return new Promise((resolve, reject) => {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        resolve(data.display_name);
+                    } else {
+                        reject('Could not get address');
+                    }
+                })
+                .catch(reject);
+        });
+    }
+
+    function getCurrentLocation(inputId) {
+        const input = document.getElementById(inputId);
+        const useLocationBtn = document.querySelector(`[data-for="${inputId}"]`);
+        
+        if (!navigator.geolocation) {
+            showNotification('Geolocation is not supported by your browser', 'error');
+            return;
+        }
+
+        useLocationBtn.disabled = true;
+        useLocationBtn.innerHTML = '<div class="loader"></div> Getting location...';
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const address = await getFormattedAddress(
+                        position.coords.latitude,
+                        position.coords.longitude
+                    );
+                    input.value = address;
+                    useLocationBtn.disabled = false;
+                    useLocationBtn.innerHTML = 'Use Current Location';
+                    showNotification('Location updated successfully', 'success');
+                } catch (error) {
+                    console.error('Error getting address:', error);
+                    useLocationBtn.disabled = false;
+                    useLocationBtn.innerHTML = 'Use Current Location';
+                    showNotification('Could not get your address', 'error');
+                }
+            },
+            (error) => {
+                console.error('Geolocation error:', error);
+                useLocationBtn.disabled = false;
+                useLocationBtn.innerHTML = 'Use Current Location';
+                showNotification('Could not get your location', 'error');
+            }
+        );
+    }
+
+    let debounceTimer;
+
+    function debounce(func, delay) {
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => func.apply(context, args), delay);
+        }
+    }
+
+    function handleLocationInput(input, suggestionsId) {
+        const suggestionsDiv = document.getElementById(suggestionsId);
+        const query = input.value.trim();
+        
+        if (query.length < 3) {
+            suggestionsDiv.classList.add('hidden');
+            return;
+        }
+
+        debounce(() => {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsDiv.innerHTML = '';
+                    if (data.length > 0) {
+                        data.slice(0, 5).forEach(place => {
+                            const div = document.createElement('div');
+                            div.className = 'location-suggestion';
+                            div.textContent = place.display_name;
+                            div.onclick = () => {
+                                input.value = place.display_name;
+                                suggestionsDiv.classList.add('hidden');
+                            };
+                            suggestionsDiv.appendChild(div);
+                        });
+                        suggestionsDiv.classList.remove('hidden');
+                    } else {
+                        suggestionsDiv.classList.add('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching locations:', error);
+                    suggestionsDiv.classList.add('hidden');
+                });
+        }, 300)();
+    }
+
+    // Add click event listener to hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        const suggestions = document.querySelectorAll('.location-suggestions');
+        suggestions.forEach(suggestion => {
+            if (!suggestion.contains(e.target) && !e.target.matches('input')) {
+                suggestion.classList.add('hidden');
+            }
+        });
+    });
 </script>
 </head>
 <body class="bg-gray-100 min-h-screen relative">
@@ -258,7 +399,7 @@
                     <div class="text-blue-600 text-5xl mb-4">
                         <!-- Handshake Icon -->
                         <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z M9 12l2 2 4-4"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z M9 12l2 2 4-4"></path>
                         </svg>
                     </div>
                     <h3 class="text-xl font-semibold mb-3">3. Complete Exchange</h3>
@@ -370,7 +511,32 @@
 
                         <div>
                             <label class="block text-gray-700 mb-1">Your Location</label>
-                            <input type="text" id="donor-location" class="w-full px-3 py-2 border rounded" placeholder="City, State or Address" required>
+                            <div class="flex gap-2">
+                                <div class="location-input-wrapper flex-1">
+                                    <input type="text" 
+                                           id="donor-location" 
+                                           class="w-full px-3 py-2 border rounded" 
+                                           placeholder="Start typing your location..." 
+                                           autocomplete="off"
+                                           oninput="handleLocationInput(this, 'donor-location-suggestions')"
+                                           required>
+                                    <div id="donor-location-suggestions" class="location-suggestions hidden"></div>
+                                </div>
+                                <button type="button" 
+                                        data-for="donor-location"
+                                        onclick="getCurrentLocation('donor-location')" 
+                                        class="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    Use Current Location
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 mb-1">Your Contact</label>
+                            <input type="text" id="donor-contact" class="w-full px-3 py-2 border rounded" placeholder="Enter Email" required>
                         </div>
                         <div>
                             <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Find Recipients</button>
@@ -401,7 +567,7 @@
                         </div>
                         <div>
                             <label class="block text-gray-700 mb-1">Your Contact</label>
-                            <input type="text" id="donor-contact" class="w-full px-3 py-2 border rounded" placeholder="Phone or Email" required>
+                            <input type="text" id="donor-contact" class="w-full px-3 py-2 border rounded" placeholder="Enter Email" required>
                         </div>
                         <div>
                             <label class="block text-gray-700 mb-1">Pickup Location</label>
@@ -436,7 +602,28 @@
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">Location</label>
-                        <input type="text" id="recipient-location" class="w-full px-3 py-2 border rounded" placeholder="City, State or Address" required>
+                        <div class="flex gap-2">
+                            <div class="location-input-wrapper flex-1">
+                                <input type="text" 
+                                       id="recipient-location" 
+                                       class="w-full px-3 py-2 border rounded" 
+                                       placeholder="Start typing your location..." 
+                                       autocomplete="off"
+                                       oninput="handleLocationInput(this, 'recipient-location-suggestions')"
+                                       required>
+                                <div id="recipient-location-suggestions" class="location-suggestions hidden"></div>
+                            </div>
+                            <button type="button"
+                                    data-for="recipient-location"
+                                    onclick="getCurrentLocation('recipient-location')"
+                                    class="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                Use Current Location
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">Need Type</label>
@@ -444,7 +631,7 @@
                     </div>
                     <div>
                         <label class="block text-gray-700 mb-1">Contact Information</label>
-                        <input type="text" id="recipient-contact" class="w-full px-3 py-2 border rounded" placeholder="Phone or Email" required>
+                        <input type="text" id="recipient-contact" class="w-full px-3 py-2 border rounded" placeholder="Enter Email" required>
                     </div>
                     <div>
                         <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Submit Request</button>
