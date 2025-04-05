@@ -118,8 +118,8 @@ class DonationView(View):
                     "error": "Invalid JSON data provided"
                 }, status=400)
 
-            # Validate required fields
-            required = ['donor_name', 'donor_contact', 'donation_type', 
+            # Validate required fields - remove donor_name from required fields
+            required = ['donor_contact', 'donation_type', 
                        'donor_location', 'pickup_location', 'recipient_id']
             
             missing_fields = [field for field in required if not data.get(field)]
@@ -155,7 +155,7 @@ class DonationView(View):
             from django.db import transaction
             try:
                 with transaction.atomic():
-                    # Create the records
+                    # Create the records - use data.get() for donor_name to handle empty values
                     donated = DonatedRecipient.objects.create(
                         name=recipient.name,
                         location=recipient.location,
@@ -163,14 +163,14 @@ class DonationView(View):
                         longitude=recipient.longitude,
                         donation_type=recipient.donation_type,
                         urgency=recipient.urgency,
-                        donor_name=data['donor_name'],
+                        donor_name=data.get('donor_name', ''),  # Use get() with empty default
                         recipient_contact=recipient.contact,
                         donor_contact=data['donor_contact'],
                         pickup_location=data['pickup_location']
                     )
                     
                     donation = Donation.objects.create(
-                        donor_name=data['donor_name'],
+                        donor_name=data.get('donor_name', ''),  # Use get() with empty default
                         donor_contact=data['donor_contact'],
                         donation_type=data['donation_type'].lower(),
                         pickup_location=data['pickup_location'],
@@ -223,21 +223,31 @@ class DonationView(View):
             # Send email to donor
             donor_subject = 'Thank you for your donation!'
             donor_message = f"""
-            Dear {donor_name},
+Thank you for your donation!
 
-            Thank you for your generous donation of {donation_type}. 
-            Your donation will be picked up from: {pickup_location}
+Dear {donor_name},
 
-            Recipient Details:
-            Name: {recipient_name}
-            Contact: {recipient_email}
-            Delivery Location: {delivery_location}
+Thank you for your generous donation of {donation_type}. 
+Your contribution will make a real difference in someone's life.
 
-            Thank you for making a difference in your community!
+Pickup Details
 
-            Best regards,
-            AidHub Team
-            """
+- Location: {pickup_location}
+
+Recipient Information  
+
+- Name: {recipient_name}
+- Contact: {recipient_email}
+- Delivery Location: {delivery_location}
+
+Please coordinate with the recipient to arrange the transfer of your donation.
+
+
+Thank you for making a difference in your community!
+
+Best regards,
+AidHub Team
+"""
             
             send_mail(
                 subject=donor_subject,
@@ -250,20 +260,25 @@ class DonationView(View):
             # Send email to recipient
             recipient_subject = 'Good news! Your donation request has been matched'
             recipient_message = f"""
-            Dear {recipient_name},
+Donation Match Notification
+=========================
 
-            Good news! Your request for {donation_type} has been matched with a donor.
+Dear {recipient_name},
 
-            Donor Details:
-            Name: {donor_name}
-            Contact: {donor_email}
-            Pickup Location: {pickup_location}
+Great news! Your request for {donation_type} has been matched with a donor.
 
-            Please coordinate with the donor to arrange the pickup/delivery.
+Donor Information
+---------------
+- Name: {donor_name}
+- Contact: {donor_email} 
+- Pickup Location: {pickup_location}
 
-            Best regards,
-            AidHub Team
-            """
+Please coordinate with the donor to arrange the pickup/delivery of your donation.
+
+---------------------------
+Best regards,
+AidHub Team
+"""
 
             send_mail(
                 subject=recipient_subject,
@@ -275,8 +290,6 @@ class DonationView(View):
 
         except Exception as e:
             logger.error(f"Error sending donation emails: {str(e)}")
-            # Don't raise the exception - we don't want to roll back the donation
-            # if email sending fails
             pass
 
 class AddRecipientView(View):
